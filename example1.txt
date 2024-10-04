@@ -1,0 +1,5 @@
+Nombre;Edad;Ciudad;Profesi´on
+Juan P´erez;30;Madrid;Ingeniero
+Mar´ıa G´omez;25;Barcelona;Doctora
+Carlos S´anchez;40;Valencia;Abogado
+Ana L´opez;35;Madrid;Arquitecta
