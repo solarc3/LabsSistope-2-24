@@ -30,9 +30,9 @@ int main(int argc, char **argv) {
     int flag_C = 0;
     extern char *optarg;
     extern int optind;
+    // https://people.cs.rutgers.edu/~pxk/416/notes/c-tutorials/getopt.html
     char *input_file = NULL;
     FILE *file = stdin;
-    // https://people.cs.rutgers.edu/~pxk/416/notes/c-tutorials/getopt.html
     while ((opt = getopt(argc, argv, "CLi:")) != -1) {
         switch (opt) {
             case 'C':
