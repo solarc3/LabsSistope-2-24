@@ -164,7 +164,9 @@ int main(int argc, char **argv) {
             return 1;
         }
     }
-
+    // ya que es memoria, no podemos saber el maximo, size_t permite tener el
+    // size maximo teorico, en bytes, pero no negativo
+    // ssize_t es lo mismo pero para negativos
     char *line = NULL;
     size_t len = 0;
     ssize_t read;
