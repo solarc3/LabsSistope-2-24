@@ -1,6 +1,9 @@
 /*obtener cantidad de lineas, palabras o bytes en un archivo csv */
 #include <getopt.h>
 #include <stdio.h>
+
+int count_lines(FILE *file);
+int count_characters(FILE *file);
 int main(int argc, char **argv) {
     /*
     - se indica un archivo de entrada,sino, sera por stdin
@@ -36,11 +39,9 @@ int main(int argc, char **argv) {
     while ((opt = getopt(argc, argv, "CLi:")) != -1) {
         switch (opt) {
             case 'C':
-                printf("C flag\n");
                 flag_C = 1;
                 break;
             case 'L':
-                printf("L flag\n");
                 flag_L = 1;
                 break;
             case 'i':
@@ -51,21 +52,32 @@ int main(int argc, char **argv) {
                 break;
         }
     }
-    // caso de borde, si no se agrega ni L ni C, como wc, se hacen ambas
-    // operaciones
+    // si hay un archivo de entrada, se abre
     if (input_file) {
         file = fopen(input_file, "r");
         if (file == NULL) {
-            printf("Error al abrir el archivo");
-            return 1;
+            printf("Error al abrir el archivo de entrada");
         }
     }
+    // caso de borde, si no se agrega ni L ni C, como wc, se hacen ambas
+    // operaciones
     if (!flag_C && !flag_L) {
         flag_C = 1;
         flag_L = 1;
     }
+
+    int total_lines = 0;
+    int total_chars = 0;
+    if (flag_L) {
+        total_lines = count_lines(file);
+        printf("total de lineas %d: ", total_lines);
+    }
+    if (flag_C) {
+        total_chars = count_characters(file);
+        printf("total de caracteres %d: ", total_chars);
+    }
 }
-// funciones gpetadas las tengo que probar
+
 int count_lines(FILE *file) {
     int lines = 0;
     char c;
@@ -74,29 +86,16 @@ int count_lines(FILE *file) {
             lines++;
         }
     }
-    rewind(
-        file); // Volver al inicio del archivo para no afectar otras operaciones
+    rewind(file);
     return lines;
 }
 
 int count_characters(FILE *file) {
     int chars = 0;
-    while (fgetc(file) != EOF) {
+    char c;
+    while ((c = fgetc(file)) != EOF) {
         chars++;
     }
-    rewind(
-        file); // Volver al inicio del archivo para no afectar otras operaciones
+    rewind(file);
     return chars;
 }
-
-/*
-void count_file(FILE *input, int *lines, int *chars) {
-    int c;
-    while ((c = fgetc(input)) != EOF) {
-        (*chars)++;
-        if (c == '\n') {
-            (*lines)++;
-        }
-    }
-}
-*/
