@@ -35,7 +35,6 @@ int main(int argc, char **argv) {
     extern int optind;
     // https://people.cs.rutgers.edu/~pxk/416/notes/c-tutorials/getopt.html
     char *input_file = NULL;
-    FILE *file = stdin;
     while ((opt = getopt(argc, argv, "CLi:")) != -1) {
         switch (opt) {
             case 'C':
@@ -52,13 +51,8 @@ int main(int argc, char **argv) {
                 break;
         }
     }
-    // si hay un archivo de entrada, se abre
-    if (input_file) {
-        file = fopen(input_file, "r");
-        if (file == NULL) {
-            printf("Error al abrir el archivo de entrada");
-        }
-    }
+    FILE *file = input_file ? fopen(input_file, "r") : stdin;
+
     // caso de borde, si no se agrega ni L ni C, como wc, se hacen ambas
     // operaciones
     if (!flag_C && !flag_L) {

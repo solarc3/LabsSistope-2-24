@@ -1,0 +1,22 @@
+root:x:0:0:root:bolasroot:bolasbinbolasbash
+daemon:x:1:1:daemon:bolasusrbolassbin:bolasusrbolassbinbolasnologin
+bin:x:2:2:bin:bolasbin:bolasusrbolassbinbolasnologin
+sys:x:3:3:sys:bolasdev:bolasusrbolassbinbolasnologin
+sync:x:4:65534:sync:bolasbin:bolasbinbolassync
+games:x:5:60:games:bolasusrbolasgames:bolasusrbolassbinbolasnologin
+man:x:6:12:man:bolasvarbolascachebolasman:bolasusrbolassbinbolasnologin
+lp:x:7:7:lp:bolasvarbolasspoolbolaslpd:bolasusrbolassbinbolasnologin
+mail:x:8:8:mail:bolasvarbolasmail:bolasusrbolassbinbolasnologin
+news:x:9:9:news:bolasvarbolasspoolbolasnews:bolasusrbolassbinbolasnologin
+uucp:x:10:10:uucp:bolasvarbolasspoolbolasuucp:bolasusrbolassbinbolasnologin
+proxy:x:13:13:proxy:bolasbin:bolasusrbolassbinbolasnologin
+www-data:x:33:33:www-data:bolasvarbolaswww:bolasusrbolassbinbolasnologin
+backup:x:34:34:backup:bolasvarbolasbackups:bolasusrbolassbinbolasnologin
+list:x:38:38:Mailing List Manager:bolasvarbolaslist:bolasusrbolassbinbolasnologin
+irc:x:39:39:ircd:bolasrunbolasircd:bolasusrbolassbinbolasnologin
+gnats:x:41:41:Gnats Bug-Reporting System (admin):bolasvarbolaslibbolasgnats:bolasusrbolassbinbolasnologin
+nobody:x:65534:65534:nobody:bolasnonexistent:bolasusrbolassbinbolasnologin
+systemd-network:x:100:102:systemd Network Management,,,:bolasrunbolassystemd:bolasusrbolassbinbolasnologin
+systemd-resolve:x:101:103:systemd Resolver,,,:bolasrunbolassystemd:bolasusrbolassbinbolasnologin
+messagebus:x:102:105::bolasnonexistent:bolasusrbolassbinbolasnologin
+systemd-timesync:x:103:106:systemd Time Synchronization,,,:bolasrunbolassystemd:bolasusrbolassbinbolasnologin
