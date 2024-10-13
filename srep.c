@@ -14,13 +14,13 @@
 // -S string nuevo
 // -i archivo de entrada, si no se especifica, stdin
 // -o archivo de salida, si no se especifica, stdout
-int str_len(char *str);
+size_t str_len(char *str);
 char *str_str(char *haystack, char *needle);
 char *replace_str(char *line, char *target, char *replace);
 char *resize_buffer(char *line, int *capacity, int new_size);
 int str_compare(char *s1, char *s2);
 
-int str_len(char *str) {
+size_t str_len(char *str) {
     int size = 0;
     // delimiter es \0
     while (str[size]) {
@@ -30,54 +30,47 @@ int str_len(char *str) {
 }
 
 char *replace_str(char *line, char *target, char *replace) {
-    int target_len = str_len(target);
-    int replacement_len = str_len(replace);
-
-    int capacity = 128; // initial size
-    char *result = malloc(capacity);
-
-    int result_len = 0;
-    char *position = line;
-    char *found;
-    while ((found = str_str(position, target)) != NULL) {
-        // como calculamos linea por linea, calculamos la diferencia para llegar
-        // al hit
-        //
-        int prefix_length = found - position;
-
-        // tenemos espacio para copiar?
-        char *new_result =
-            resize_buffer(result, &capacity,
-                          result_len + prefix_length + replacement_len + 1);
-        if (!new_result) {
-            free(result);
-            return NULL;
-        }
-        result = new_result;
-        // copiamos lo anterior al target
-        for (int i = 0; i < prefix_length; i++) {
-            result[result_len++] = position[i];
-        }
-        // copiamos el target
-        for (int i = 0; i < replacement_len; i++) {
-            result[result_len++] = replace[i];
-        }
-        // seguimos revisando
-        position = found + target_len;
+    size_t target_len = str_len(target);
+    size_t replace_len = str_len(replace);
+    size_t line_len = str_len(line);
+    // ver cantidad de veces que sucede el target en la linea, asi se tiene size
+    // necesario con anterioridad
+    size_t count = 0;
+    char *tmp = line;
+    while ((tmp = str_str(tmp, target))) {
+        ++count;
+        tmp += target_len;
     }
-    // si ya no ocurren mas, copiamos el resto
-    int suffix_length = str_len(position);
-    char *new_result =
-        resize_buffer(result, &capacity, result_len + suffix_length + 1);
-    if (!new_result) {
-        free(result);
+
+    // nuevo size, se multiplica por la cantidad de hits en la linea
+    size_t new_len = line_len + count * (replace_len - target_len) + 1;
+    char *result = malloc(new_len);
+    if (!result)
         return NULL;
+    // dest se usa para copiar el resultado, src para recorrer la linea
+    // original found para el target
+    char *dest = result;
+    char *src = line;
+    char *found;
+
+    while ((found = str_str(src, target))) {
+        size_t prefix_len = found - src;
+        // copiar lo que antecede, el prefijo
+        for (size_t i = 0; i < prefix_len; ++i)
+            *dest++ = *src++;
+        // copiar el reemplazo
+        for (size_t i = 0; i < replace_len; ++i)
+            *dest++ = replace[i];
+        // avanzamos en el string
+        src += target_len;
     }
-    result = new_result;
-    for (int i = 0; i < suffix_length; i++) {
-        result[result_len++] = position[i];
-    }
-    result[result_len] = '\0'; // paso final de una linea
+
+    // se agrega el resto de la linea original, como se acaba en el ultimo
+    // reemplazo el ciclo while, faltaria agrega lo que sigue despues
+    while (*src)
+        *dest++ = *src++;
+    *dest = '\0';
+
     return result;
 }
 
@@ -103,17 +96,8 @@ char *str_str(char *haystack, char *needle) {
     }
     return NULL;
 }
-
-char *resize_buffer(char *line, int *capacity, int new_size) {
-    while (*capacity < new_size) {
-        *capacity *= 2;
-    }
-    return realloc(line, *capacity);
-}
-
 int main(int argc, char **argv) {
     extern char *optarg;
-    extern int optind;
     int opt;
     char *input_file = NULL;
     char *output_file = NULL;
@@ -137,61 +121,58 @@ int main(int argc, char **argv) {
         }
     }
     if (target == NULL || replacement == NULL) {
-        printf("Uso: %s [-s string_objetivo] [-S string_nuevo] [-i "
-               "archivo_entrada] [-o archivo_salida]\n",
-               argv[0]);
-        return 1;
+        fprintf(stderr,
+                "Uso: %s [-s string_objetivo] [-S string_nuevo] [-i "
+                "archivo_entrada] [-o archivo_salida]\n",
+                argv[0]);
+        exit(EXIT_FAILURE);
     }
-
-    FILE *file = stdin;
-    FILE *out_file = stdout;
-
-    if (input_file) {
-        file = fopen(input_file, "r");
-        if (!file) {
-            printf("Error al abrir el archivo de entrada");
-            return 1;
-        }
-    }
-
-    if (output_file) {
-        out_file = fopen(output_file, "w");
-        if (!out_file) {
-            printf("Error al abrir el archivo de salida");
-            if (file != stdin) {
-                fclose(file);
-            }
-            return 1;
-        }
+    FILE *file = input_file ? fopen(input_file, "r") : stdin;
+    FILE *out_file = output_file ? fopen(output_file, "w") : stdout;
+    if (!file || !out_file) {
+        fprintf(stderr, "Error al abrir los archivos\n");
+        exit(EXIT_FAILURE);
     }
     // ya que es memoria, no podemos saber el maximo, size_t permite tener el
     // size maximo teorico, en bytes, pero no negativo
-    // ssize_t es lo mismo pero para negativos
+    // ssize_t es lo mismo pero incluye el -1 para errores
+    char *content = NULL;
     char *line = NULL;
     size_t len = 0;
     ssize_t read;
     while ((read = getline(&line, &len, file)) != -1) {
-        if (read > 0 && line[read - 1] == '\n') {
-            line[read - 1] = '\0';
+        char *new_content;
+        // https://www.gnu.org/software/libc/manual/html_node/Dynamic-Output.html
+        // asprintf permite concadenar el contenido automaticamente
+        // este metodo se encarga de generar memoria suficiente para la cadena
+        // resultante, elimina la necesidad de tener que precalcular un buffer
+        if (asprintf(&new_content, "%s%s", content ? content : "", line) ==
+            -1) {
+            fprintf(stderr, "No se pudo asignar memoria\n");
+            free(content);
+            free(line);
+            exit(EXIT_FAILURE);
         }
-
-        char *line_replace = replace_str(line, target, replacement);
-        if (line_replace) {
-            if (out_file == stdout) {
-                puts(line_replace);
-            } else {
-                fprintf(out_file, "%s\n", line_replace);
-            }
-            free(line_replace);
-        }
+        free(content);
+        content = new_content;
     }
     free(line);
-
-    if (file != stdin) {
+    if (content) {
+        char *result = replace_str(content, target, replacement);
+        if (result) {
+            // if (out_file == stdout)
+            // printf("\n");
+            fprintf(out_file, "%s", result);
+            free(result);
+        } else {
+            fprintf(stderr, "No se pudo reemplazar\n");
+        }
+        free(content);
+    }
+    // como ya no se hacen mas exits, se cierran los streams
+    if (file != stdin)
         fclose(file);
-    }
-    if (out_file != stdout) {
+    if (out_file != stdout)
         fclose(out_file);
-    }
-    return 0;
+    return EXIT_SUCCESS;
 }

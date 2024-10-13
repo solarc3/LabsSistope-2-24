@@ -1,9 +1,22 @@
 /*obtener cantidad de lineas, palabras o bytes en un archivo csv */
 #include <getopt.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 int count_lines(FILE *file);
 int count_characters(FILE *file);
+void count_lines_and_chars(FILE *file, int *lines, int *chars) {
+    int c;
+    *lines = 0;
+    *chars = 0;
+
+    while ((c = fgetc(file)) != EOF) {
+        (*chars)++;
+        if (c == '\n') {
+            (*lines)++;
+        }
+    }
+}
 int main(int argc, char **argv) {
     /*
     - se indica un archivo de entrada,sino, sera por stdin
@@ -47,11 +60,18 @@ int main(int argc, char **argv) {
                 input_file = optarg;
                 break;
             default:
-                printf("Uso: %s [-C] [-L] [-i archivo_entrada]\n", argv[0]);
-                break;
+                fprintf(stderr, "Uso: %s [-C] [-L] [-i archivo_entrada]\n",
+                        argv[0]);
+                exit(EXIT_FAILURE);
         }
     }
     FILE *file = input_file ? fopen(input_file, "r") : stdin;
+    if (!file) {
+        fprintf(stderr, "Error al abrir el archivo");
+        // https://www.gnu.org/software/libc/manual/html_node/Termination-Internals.html
+        // EXIT_FAILURE es lo mismo que poner 1
+        exit(EXIT_FAILURE);
+    }
 
     // caso de borde, si no se agrega ni L ni C, como wc, se hacen ambas
     // operaciones
@@ -62,34 +82,42 @@ int main(int argc, char **argv) {
 
     int total_lines = 0;
     int total_chars = 0;
-    if (flag_L) {
-        total_lines = count_lines(file);
-        printf("total de lineas %d: ", total_lines);
+
+    count_lines_and_chars(file, &total_lines, &total_chars);
+
+    if (flag_L && flag_C) {
+        printf("%d %d\n", total_lines, total_chars);
+    } else if (flag_L) {
+        printf("%d\n", total_lines);
+    } else if (flag_C) {
+        printf("%d\n", total_chars);
     }
-    if (flag_C) {
-        total_chars = count_characters(file);
-        printf("total de caracteres %d: ", total_chars);
+
+    if (file != stdin) {
+        fclose(file);
     }
+
+    return EXIT_SUCCESS;
 }
 
 int count_lines(FILE *file) {
     int lines = 0;
-    char c;
-    while ((c = fgetc(file)) != EOF) {
+    int c;
+    while ((c = getc(file)) != EOF) {
         if (c == '\n') {
             lines++;
         }
     }
-    rewind(file);
+    fflush(file);
     return lines;
 }
 
 int count_characters(FILE *file) {
     int chars = 0;
-    char c;
-    while ((c = fgetc(file)) != EOF) {
+    int c;
+    while ((c = getc(file)) != EOF) {
         chars++;
     }
-    rewind(file);
+    fflush(file);
     return chars;
 }
