@@ -1,6 +1,7 @@
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
+#define _GNU_SOURCE
 
 // para el string replace
 // tokenizar el string de entrada en base al separador
@@ -14,12 +15,17 @@
 // -S string nuevo
 // -i archivo de entrada, si no se especifica, stdin
 // -o archivo de salida, si no se especifica, stdout
+
 size_t str_len(char *str);
 char *str_str(char *haystack, char *needle);
 char *replace_str(char *line, char *target, char *replace);
 char *resize_buffer(char *line, int *capacity, int new_size);
 int str_compare(char *s1, char *s2);
 
+
+// Entrada: cadena de caracteres (*str)
+// Salida: largo de la cadena de caracteres (size_t)
+// Descripcion: retorna el largo de la cadena de caracteres hasta encontrar un separador (\0).
 size_t str_len(char *str) {
     int size = 0;
     // delimiter es \0
@@ -29,12 +35,14 @@ size_t str_len(char *str) {
     return size;
 }
 
+// Entrada: recibe una linea (*line), cadena a buscar en la linea (*target) y cadena que reemplaza el target (*replace).
+// Salida: retorna una nueva cadena con los reemplazos realizados, si falla retorna nulo
+// Descripcion: reemplaza los target por replace en la linea, calculando el nuevo tamaño de la cadena resultante.
 char *replace_str(char *line, char *target, char *replace) {
     size_t target_len = str_len(target);
     size_t replace_len = str_len(replace);
     size_t line_len = str_len(line);
-    // ver cantidad de veces que sucede el target en la linea, asi se tiene size
-    // necesario con anterioridad
+    // ver cantidad de veces que sucede el target en la linea, asi se tiene el size necesario con anterioridad
     size_t count = 0;
     char *tmp = line;
     while ((tmp = str_str(tmp, target))) {
@@ -47,8 +55,7 @@ char *replace_str(char *line, char *target, char *replace) {
     char *result = malloc(new_len);
     if (!result)
         return NULL;
-    // dest se usa para copiar el resultado, src para recorrer la linea
-    // original found para el target
+    // dest se usa para copiar el resultado, src para recorrer la linea original y found para el target
     char *dest = result;
     char *src = line;
     char *found;
@@ -65,8 +72,9 @@ char *replace_str(char *line, char *target, char *replace) {
         src += target_len;
     }
 
-    // se agrega el resto de la linea original, como se acaba en el ultimo
-    // reemplazo el ciclo while, faltaria agrega lo que sigue despues
+    // se agrega el resto de la linea original despues del ultimo
+    // reemplazo del ciclo while, faltaria agregar lo que sigue despues.
+    // (termina la cadena con el separador \0)
     while (*src)
         *dest++ = *src++;
     *dest = '\0';
@@ -74,6 +82,10 @@ char *replace_str(char *line, char *target, char *replace) {
     return result;
 }
 
+// Entrada: recibe 2 cadenas de strings (*s1, *s2)
+// Salida: retorna 1 si ambas son iguales, caso contrario, retorna 0.
+// Descripcion: compara las cadenas de strings hasta que termine (considerar que caracter por caracter), 
+//              o hasta que se encuentre una diferencia.
 int str_compare(char *s1, char *s2) {
     while (*s1 && *s2 && *s1 == *s2) {
         s1++;
@@ -81,21 +93,26 @@ int str_compare(char *s1, char *s2) {
     }
     return *s1 == *s2;
 }
-// fuerza bruta
+
+// Entrada: recibe una cadena (*haystack) y una subcadena (*needle)
+// Salida: retorna un puntero si se encuentra *needle en *haystack, caso contrario, nulo.
+// Descripcion: realiza una busqueda de *needle en la cadena *haystack mediante fuerza bruta comparando
+//              caracter por caracter.
 char *str_str(char *haystack, char *needle) {
     int position, shift;
     if (needle[0] == '\0') {
-        return haystack;
+        return haystack; // caso needle vacio
     }
     for (shift = 0; haystack[shift] != '\0'; shift++) {
         for (position = 0; haystack[position + shift] == needle[position];
              position++)
             if (needle[position + 1] == '\0') {
-                return haystack + shift;
+                return haystack + shift; // caso en el que se encuentra needle
             }
     }
-    return NULL;
+    return NULL; // no se encuentra needle
 }
+
 int main(int argc, char **argv) {
     extern char *optarg;
     int opt;
@@ -133,19 +150,17 @@ int main(int argc, char **argv) {
         fprintf(stderr, "Error al abrir los archivos\n");
         exit(EXIT_FAILURE);
     }
-    // ya que es memoria, no podemos saber el maximo, size_t permite tener el
-    // size maximo teorico, en bytes, pero no negativo
-    // ssize_t es lo mismo pero incluye el -1 para errores
+    // ya que es memoria, no podemos saber el maximo, size_t permite tener el size maximo teorico
+    // en bytes pero no negativo, ssize_t es lo mismo pero incluye el -1 para errores.
     char *content = NULL;
     char *line = NULL;
     size_t len = 0;
     ssize_t read;
     while ((read = getline(&line, &len, file)) != -1) {
         char *new_content;
-        // https://www.gnu.org/software/libc/manual/html_node/Dynamic-Output.html
-        // asprintf permite concadenar el contenido automaticamente
-        // este metodo se encarga de generar memoria suficiente para la cadena
-        // resultante, elimina la necesidad de tener que precalcular un buffer
+        // asprintf permite concadenar el contenido automaticamente, este metodo se encarga de
+        // generar memoria suficiente para la cadena resultante, elimina la necesidad de tener 
+        // que precalcular un buffer.
         if (asprintf(&new_content, "%s%s", content ? content : "", line) ==
             -1) {
             fprintf(stderr, "No se pudo asignar memoria\n");
@@ -160,8 +175,6 @@ int main(int argc, char **argv) {
     if (content) {
         char *result = replace_str(content, target, replacement);
         if (result) {
-            // if (out_file == stdout)
-            // printf("\n");
             fprintf(out_file, "%s", result);
             free(result);
         } else {

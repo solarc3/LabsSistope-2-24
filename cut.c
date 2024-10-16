@@ -2,9 +2,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// funcion que maneja las columnas (-c), columnas = columnas que serán extraidas del archivo de entrada para ser 
+// retornadas en output (definida mas abajo)
 int parse_columns(char *optarg, int **columns, int *num_columns);
+
+// funcion que extrae columnas del archivo de entrada para retornarlas por el de salida (definida mas abajo)
 void extract_columns(FILE *in, FILE *out, char sep, int *columns,
                      int num_columns, int all_columns);
+
+// Entrada: recibe 2 strings.
+// Salida: retorna 1 si los strings son iguales, caso contrario, retorna 0.
+// Descripción: compara ambos strings entregados, si son iguales retorna 1, sino 0.
 int str_compare(char *s1, char *s2) {
     while (*s1 && *s2 && *s1 == *s2) {
         s1++;
@@ -13,6 +21,7 @@ int str_compare(char *s1, char *s2) {
     return *s1 == *s2;
 }
 
+// Descripcion: 
 int main(int argc, char *argv[]) {
     int opt;
     char *input_file = NULL;
@@ -30,7 +39,7 @@ int main(int argc, char *argv[]) {
                 output_file = optarg;
                 break;
             case 'd':
-                if (optarg && optarg[0] != '\0') {
+                if (optarg && optarg[0] != '\0') { 
                     if (optarg[0] == 'b' && optarg[1] == '\0') {
                         sep = ' ';
                     } else if (optarg[0] == 't' && optarg[1] == '\0') {
@@ -60,6 +69,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    // abrir archivos entrada y salida --> stdin y stdout (predeterminado)
     FILE *in = input_file ? fopen(input_file, "r") : stdin;
     FILE *out = output_file ? fopen(output_file, "w") : stdout;
     if (!in || !out) {
@@ -78,8 +88,11 @@ int main(int argc, char *argv[]) {
     return EXIT_SUCCESS;
 }
 
-// funcion que maneja las columnas (-c), columnas = columnas que serán extraidas
-// del archivo de entrada para ser retornadas en output
+// Entradas: recibe un string (columnas a extraer del archivo), un arreglo que almacena columnas (**columns apunta a un arreglo)
+//           y un puntero (*num_columns) que almacena la cantidad de columnas que cumplen con lo solicitado.
+// Salidas:  retorna 0 si la ejecucion fue correcta, por el contrario, retorna 1 si existen errores.
+// Descripcion: convierte un string en una lista (arreglo) de columnas que deben ser extraidas del archivo, si se genera
+//              un error retorna un mensaje retroalimentando por consola.
 int parse_columns(char *optarg, int **columns, int *num_columns) {
     if (optarg == NULL) {
         fprintf(stderr, "Error: No column specification provided\n");
@@ -87,7 +100,7 @@ int parse_columns(char *optarg, int **columns, int *num_columns) {
     }
 
     char *col = optarg;
-    int capacity = 10; // Capacidad inicial
+    int capacity = 10; // capacidad inicial
     *columns = malloc(capacity * sizeof(int));
     if (*columns == NULL) {
         fprintf(stderr, "Error: Memory allocation failed\n");
@@ -119,7 +132,7 @@ int parse_columns(char *optarg, int **columns, int *num_columns) {
             *columns = temp;
         }
 
-        // ok, se almacena la columna en el array
+        // se almacena la columna en el array
         (*columns)[(*num_columns)++] = (int)val;
 
         // siguiente valor o fin de la cadena
@@ -143,6 +156,13 @@ int parse_columns(char *optarg, int **columns, int *num_columns) {
     return 0;
 }
 
+// Entradas: recibe el archivo de entrada (input_file), archivo de salida (output_file), el separador de las columnas que se
+//           desean extraer, una lista (arreglo) con los números y cantidad de columnas a extraer, y finalmente, un flag que 
+//           indica si todas las columnas deben ser extraidas.
+// Salidas:  retorna mediante el archivo de salida, las columnas que fueron extraidas dependiendo del separador señalado.
+// Descripción: lee el archivo de entrada linea por linea, separando cada una de éstas en columnas dependiendo del separador
+//              solicitado, para luego retornarlas mediante el archivo de salida. Si no se especifican columnas, se retornaran 
+//              todas las columnas del archivo de entrada al de salida (all_columns).
 void extract_columns(FILE *in, FILE *out, char sep, int *columns,
                      int num_columns, int all_columns) {
     char *line = NULL;
@@ -155,7 +175,7 @@ void extract_columns(FILE *in, FILE *out, char sep, int *columns,
         char *start = line;
         char *ptr = line;
 
-        while (*ptr) {
+        while (*ptr) { // divide las lineas en columnas
             if (*ptr == sep || *ptr == '\n') {
                 char temp = *ptr;
                 *ptr = '\0';
