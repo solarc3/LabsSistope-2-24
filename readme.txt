@@ -7,4 +7,5 @@ Para el buen funcionamiento del codigo, se dejan estas explicaciones a tener en 
         $ ./cut -i input.txt -o output.txt -d ';' -c 2,4
         $ ./cut -i input.txt -o output.txt -d : -c 2,4 
 
-2. se añadio #define _GNU_SOURCE a srep.c debido a que al compilar se generaba un warning.
+2. Se añadio #define _GNU_SOURCE a srep.c debido a que al compilar se generaba un warning, y esta al ser una 
+   extensión de GNU de la libreria STD de C, resuelve el aviso. [https://man7.org/linux/man-pages/man3/asprintf.3.html]

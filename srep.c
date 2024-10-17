@@ -1,7 +1,7 @@
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
-#define _GNU_SOURCE
+#define _GNU_SOURCE // Extensión GNU libreria STD de C. [https://man7.org/linux/man-pages/man3/asprintf.3.html]
 
 // para el string replace
 // tokenizar el string de entrada en base al separador
