@@ -1,7 +1,8 @@
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
-#define _GNU_SOURCE // extension GNU libreria STD de C. [https://man7.org/linux/man-pages/man3/asprintf.3.html]
+#define _GNU_SOURCE // extension GNU libreria STD de C.
+                    // [https://man7.org/linux/man-pages/man3/asprintf.3.html]
 
 size_t str_len(char *str);
 char *str_str(char *haystack, char *needle);
@@ -9,10 +10,10 @@ char *replace_str(char *line, char *target, char *replace);
 char *resize_buffer(char *line, int *capacity, int new_size);
 int str_compare(char *s1, char *s2);
 
-
 // Entrada: cadena de caracteres (*str)
 // Salida: largo de la cadena de caracteres (size_t)
-// Descripcion: retorna el largo de la cadena de caracteres hasta encontrar un separador (\0).
+// Descripcion: retorna el largo de la cadena de caracteres hasta encontrar un
+// separador (\0).
 size_t str_len(char *str) {
     int size = 0;
     // delimiter es \0
@@ -22,14 +23,17 @@ size_t str_len(char *str) {
     return size;
 }
 
-// Entrada: recibe una linea (*line), cadena a buscar en la linea (*target) y cadena que reemplaza el target (*replace).
-// Salida: retorna una nueva cadena con los reemplazos realizados, si falla retorna nulo
-// Descripcion: reemplaza los target por replace en la linea, calculando el nuevo tamaño de la cadena resultante.
+// Entrada: recibe una linea (*line), cadena a buscar en la linea (*target) y
+// cadena que reemplaza el target (*replace). Salida: retorna una nueva cadena
+// con los reemplazos realizados, si falla retorna nulo Descripcion: reemplaza
+// los target por replace en la linea, calculando el nuevo tamaño de la cadena
+// resultante.
 char *replace_str(char *line, char *target, char *replace) {
     size_t target_len = str_len(target);
     size_t replace_len = str_len(replace);
     size_t line_len = str_len(line);
-    // ver cantidad de veces que sucede el target en la linea, asi se tiene el size necesario con anterioridad
+    // ver cantidad de veces que sucede el target en la linea, asi se tiene el
+    // size necesario con anterioridad
     size_t count = 0;
     char *tmp = line;
     while ((tmp = str_str(tmp, target))) {
@@ -42,7 +46,8 @@ char *replace_str(char *line, char *target, char *replace) {
     char *result = malloc(new_len);
     if (!result)
         return NULL;
-    // dest se usa para copiar el resultado, src para recorrer la linea original y found para el target
+    // dest se usa para copiar el resultado, src para recorrer la linea original
+    // y found para el target
     char *dest = result;
     char *src = line;
     char *found;
@@ -71,7 +76,8 @@ char *replace_str(char *line, char *target, char *replace) {
 
 // Entrada: recibe 2 cadenas de strings (*s1, *s2)
 // Salida: retorna 1 si ambas son iguales, caso contrario, retorna 0.
-// Descripcion: compara las cadenas de strings hasta que termine (considerar que va caracter por caracter), 
+// Descripcion: compara las cadenas de strings hasta que termine (considerar que
+// va caracter por caracter),
 //              o hasta que se encuentre una diferencia.
 int str_compare(char *s1, char *s2) {
     while (*s1 && *s2 && *s1 == *s2) {
@@ -81,13 +87,16 @@ int str_compare(char *s1, char *s2) {
     return *s1 == *s2;
 }
 
-// Entrada: recibe una cadena string(haystack) y la subcadena a buscar en esta(needle).
-// Salida: si encuentra la subcadena se retorna la posicion + shift(para que parta en ella),
-//         si no la encuentra, NULL. 
-// Descripcion: realiza la busqueda de un substring en un string mas grande, mediante fuerza bruta
-//              revisa cada caracter y va verificando si parte con el mismo que se busca y
-//              luego de eso verifica si coincide en la totalidad, si es que lo hace, retorna
-//              el desplazamiento necesario para partir en ella via haystack+shift
+// Entrada: recibe una cadena string(haystack) y la subcadena a buscar en
+// esta(needle). Salida: si encuentra la subcadena se retorna la posicion +
+// shift(para que parta en ella),
+//         si no la encuentra, NULL.
+// Descripcion: realiza la busqueda de un substring en un string mas grande,
+// mediante fuerza bruta
+//              revisa cada caracter y va verificando si parte con el mismo que
+//              se busca y luego de eso verifica si coincide en la totalidad, si
+//              es que lo hace, retorna el desplazamiento necesario para partir
+//              en ella via haystack+shift
 
 char *str_str(char *haystack, char *needle) {
     int position, shift;
@@ -98,9 +107,10 @@ char *str_str(char *haystack, char *needle) {
         for (position = 0; haystack[position + shift] == needle[position];
              position++)
             if (needle[position + 1] == '\0') {
-                return haystack + shift; // se encontre y ademas termina, se retorna la
-                                         // posicion en el string grande donde parte el
-                                         // substring que buscamos.
+                return haystack +
+                       shift; // se encontre y ademas termina, se retorna la
+                              // posicion en el string grande donde parte el
+                              // substring que buscamos.
             }
     }
     return NULL; // no se encuentra, no se retorna nada
@@ -143,17 +153,18 @@ int main(int argc, char **argv) {
         fprintf(stderr, "Error al abrir los archivos\n");
         exit(EXIT_FAILURE);
     }
-    // ya que es memoria, no podemos saber el maximo, size_t permite tener el size maximo teorico
-    // en bytes pero no negativo, ssize_t es lo mismo pero incluye el -1 para errores.
+    // ya que es memoria, no podemos saber el maximo, size_t permite tener el
+    // size maximo teorico en bytes pero no negativo, ssize_t es lo mismo pero
+    // incluye el -1 para errores.
     char *content = NULL;
     char *line = NULL;
     size_t len = 0;
     ssize_t read;
     while ((read = getline(&line, &len, file)) != -1) {
         char *new_content;
-        // asprintf permite concadenar el contenido automaticamente, este metodo se encarga de
-        // generar memoria suficiente para la cadena resultante, elimina la necesidad de tener 
-        // que precalcular un buffer.
+        // asprintf permite concadenar el contenido automaticamente, este metodo
+        // se encarga de generar memoria suficiente para la cadena resultante,
+        // elimina la necesidad de tener que precalcular un buffer.
         if (asprintf(&new_content, "%s%s", content ? content : "", line) ==
             -1) {
             fprintf(stderr, "No se pudo asignar memoria\n");
