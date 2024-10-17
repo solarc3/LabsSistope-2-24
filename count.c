@@ -8,8 +8,10 @@ int count_lines(FILE *file);
 // contabiliza caracteres (definida mas abajo)
 int count_characters(FILE *file);
 
-// Entrada: recibe 3 punteros -> (*file) con el que se contaran lineas y caracteres, 
-//          (*lines) almacena lineas encontradas y (*chars) almacena caracteres contabilizados.
+// Entrada: recibe 3 punteros -> (*file) con el que se contaran lineas y
+// caracteres,
+//          (*lines) almacena lineas encontradas y (*chars) almacena caracteres
+//          contabilizados.
 // Salida: actualiza punteros.
 // Descripcion: actualiza los valores de los punteros (*lines y *chars).
 void count_lines_and_chars(FILE *file, int *lines, int *chars) {
@@ -25,9 +27,10 @@ void count_lines_and_chars(FILE *file, int *lines, int *chars) {
     }
 }
 
-// se procesa lo ingresado por consola mediante getopt, contabilizando el numero de lineas (-L) y 
-// caracteres (-C; se consideran las mayusculas, minusculas, vocales y tildes) para guardarlo en 
-// un archivo de salida, si no se especifica archivo (-i) se usa stdin.
+// se procesa lo ingresado por consola mediante getopt, contabilizando el numero
+// de lineas (-L) y caracteres (-C; se consideran las mayusculas, minusculas,
+// vocales y tildes) para guardarlo en un archivo de salida, si no se especifica
+// archivo (-i) se usa stdin.
 int main(int argc, char **argv) {
     int opt;
     int flag_L = 0;
@@ -59,7 +62,8 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    // caso de borde, si no se agrega ni L ni C, como wc, se hacen ambas operaciones
+    // caso de borde, si no se agrega ni L ni C, como wc, se hacen ambas
+    // operaciones
     if (!flag_C && !flag_L) {
         flag_C = 1;
         flag_L = 1;
@@ -103,7 +107,8 @@ int count_lines(FILE *file) {
 
 // Entrada: recibe un puntero (*file) con el que se contaran los caracteres.
 // Salida: numero de caracteres en el archivo.
-// Descripcion: recorre el archivo uno por uno incrementando el contador de caracteres.
+// Descripcion: recorre el archivo uno por uno incrementando el contador de
+// caracteres.
 int count_characters(FILE *file) {
     int chars = 0;
     int c;
