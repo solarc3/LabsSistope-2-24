@@ -1,20 +1,7 @@
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
-#define _GNU_SOURCE // Extensión GNU libreria STD de C. [https://man7.org/linux/man-pages/man3/asprintf.3.html]
-
-// para el string replace
-// tokenizar el string de entrada en base al separador
-// meter cada token a una lista enlazada
-// recorrer la lista y comparar, reemplazar los que sean validos
-// concatenar los tokens en un string de salida
-// liberar la memoria de la lista
-
-// flags getopt()
-// -s string objetivo
-// -S string nuevo
-// -i archivo de entrada, si no se especifica, stdin
-// -o archivo de salida, si no se especifica, stdout
+#define _GNU_SOURCE // extension GNU libreria STD de C. [https://man7.org/linux/man-pages/man3/asprintf.3.html]
 
 size_t str_len(char *str);
 char *str_str(char *haystack, char *needle);
@@ -84,7 +71,7 @@ char *replace_str(char *line, char *target, char *replace) {
 
 // Entrada: recibe 2 cadenas de strings (*s1, *s2)
 // Salida: retorna 1 si ambas son iguales, caso contrario, retorna 0.
-// Descripcion: compara las cadenas de strings hasta que termine (considerar que caracter por caracter), 
+// Descripcion: compara las cadenas de strings hasta que termine (considerar que va caracter por caracter), 
 //              o hasta que se encuentre una diferencia.
 int str_compare(char *s1, char *s2) {
     while (*s1 && *s2 && *s1 == *s2) {
@@ -95,9 +82,10 @@ int str_compare(char *s1, char *s2) {
 }
 
 // Entrada: recibe una cadena (*haystack) y una subcadena (*needle)
-// Salida: retorna un puntero si se encuentra *needle en *haystack, caso contrario, nulo.
-// Descripcion: realiza una busqueda de *needle en la cadena *haystack mediante fuerza bruta comparando
-//              caracter por caracter.
+// Salida: retorna un puntero si se encuentra el substring(needle) en el string mas grande(haystack), 
+//         caso contrario, nulo.
+// Descripcion: realiza una busqueda de un substring(needle) en un string mas grande(haystack) 
+//              mediante fuerza bruta comparando caracter por caracter.
 char *str_str(char *haystack, char *needle) {
     int position, shift;
     if (needle[0] == '\0') {

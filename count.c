@@ -1,4 +1,3 @@
-/*obtener cantidad de lineas, palabras o bytes en un archivo csv */
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,8 +26,8 @@ void count_lines_and_chars(FILE *file, int *lines, int *chars) {
 }
 
 // se procesa lo ingresado por consola mediante getopt, contabilizando el numero de lineas (-L) y 
-// caracteres (-C; se consideran las mayus, minusculas, vocales y tildes) para guardarlo en un archivo
-// de salida, si no se especifica archivo (-i) se usa stdin.
+// caracteres (-C; se consideran las mayusculas, minusculas, vocales y tildes) para guardarlo en 
+// un archivo de salida, si no se especifica archivo (-i) se usa stdin.
 int main(int argc, char **argv) {
     int opt;
     int flag_L = 0;
@@ -89,7 +88,7 @@ int main(int argc, char **argv) {
 
 // Entrada: recibe un puntero (*file) con el que se contaran las lineas.
 // Salida: numero de lineas del archivo.
-// Descripcion: recorre el archivo contabilizando uno por uno las lineas (= \n).
+// Descripcion: recorre el archivo contabilizando uno por uno las lineas. (= \n)
 int count_lines(FILE *file) {
     int lines = 0;
     int c;
