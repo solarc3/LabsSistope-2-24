@@ -81,24 +81,29 @@ int str_compare(char *s1, char *s2) {
     return *s1 == *s2;
 }
 
-// Entrada: recibe una cadena (*haystack) y una subcadena (*needle)
-// Salida: retorna un puntero si se encuentra el substring(needle) en el string mas grande(haystack), 
-//         caso contrario, nulo.
-// Descripcion: realiza una busqueda de un substring(needle) en un string mas grande(haystack) 
-//              mediante fuerza bruta comparando caracter por caracter.
+// Entrada: recibe una cadena string(haystack) y la subcadena a buscar en esta(needle).
+// Salida: si encuentra la subcadena se retorna la posicion + shift(para que parta en ella),
+//         si no la encuentra, NULL. 
+// Descripcion: realiza la busqueda de un substring en un string mas grande, mediante fuerza bruta
+//              revisa cada caracter y va verificando si parte con el mismo que se busca y
+//              luego de eso verifica si coincide en la totalidad, si es que lo hace, retorna
+//              el desplazamiento necesario para partir en ella via haystack+shift
+
 char *str_str(char *haystack, char *needle) {
     int position, shift;
     if (needle[0] == '\0') {
-        return haystack; // caso needle vacio
+        return haystack; // caso que no se pida un substring
     }
     for (shift = 0; haystack[shift] != '\0'; shift++) {
         for (position = 0; haystack[position + shift] == needle[position];
              position++)
             if (needle[position + 1] == '\0') {
-                return haystack + shift; // caso en el que se encuentra needle
+                return haystack + shift; // se encontre y ademas termina, se retorna la
+                                         // posicion en el string grande donde parte el
+                                         // substring que buscamos.
             }
     }
-    return NULL; // no se encuentra needle
+    return NULL; // no se encuentra, no se retorna nada
 }
 
 int main(int argc, char **argv) {
