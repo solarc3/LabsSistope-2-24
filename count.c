@@ -15,13 +15,13 @@ int count_characters(FILE *file);
 // Salida: actualiza punteros.
 // Descripcion: actualiza los valores de los punteros (*lines y *chars).
 void count_lines_and_chars(FILE *file, int *lines, int *chars) {
-    int c;
+    int character;
     *lines = 0;
     *chars = 0;
 
-    while ((c = fgetc(file)) != EOF) {
+    while ((character = fgetc(file)) != EOF) {
         (*chars)++;
-        if (c == '\n') {
+        if (character == '\n') {
             (*lines)++;
         }
     }
@@ -88,33 +88,4 @@ int main(int argc, char **argv) {
     }
 
     return EXIT_SUCCESS;
-}
-
-// Entrada: recibe un puntero (*file) con el que se contaran las lineas.
-// Salida: numero de lineas del archivo.
-// Descripcion: recorre el archivo contabilizando uno por uno las lineas. (= \n)
-int count_lines(FILE *file) {
-    int lines = 0;
-    int c;
-    while ((c = getc(file)) != EOF) {
-        if (c == '\n') {
-            lines++;
-        }
-    }
-    fflush(file);
-    return lines;
-}
-
-// Entrada: recibe un puntero (*file) con el que se contaran los caracteres.
-// Salida: numero de caracteres en el archivo.
-// Descripcion: recorre el archivo uno por uno incrementando el contador de
-// caracteres.
-int count_characters(FILE *file) {
-    int chars = 0;
-    int c;
-    while ((c = getc(file)) != EOF) {
-        chars++;
-    }
-    fflush(file);
-    return chars;
 }
