@@ -40,7 +40,6 @@ int str_compare(char *s1, char *s2) {
     return *s1 == '\0' && *s2 == '\0';
 }
 
-// Función para obtener la longitud de una cadena
 size_t str_len(char *str) {
     size_t size = 0;
     while (str[size]) {

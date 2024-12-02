@@ -89,14 +89,14 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
                               &arguments->num_columns) != 0) {
                 argp_error(state, "Columna no valida para -c");
             }
-            arguments->all_columns =
-                0; // Si se especifican columnas, no usar todas
+            arguments->all_columns = 0;
             break;
         case ARGP_KEY_ARG:
             return 0;
         case ARGP_KEY_END:
             return 0;
         default:
+            fprintf(stderr, "Error en la cantidad de argumentos\n");
             return ARGP_ERR_UNKNOWN;
     }
     return 0;
