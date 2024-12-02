@@ -58,11 +58,6 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
         case ARGP_KEY_ARG:
             return 0;
         case ARGP_KEY_END:
-            if (!arguments->input_file) {
-                fprintf(stderr, "Error: Las opciones -s (STRING_OBJETIVO) y -S "
-                                "(STRING_NUEVO) son requeridas.\n");
-                argp_usage(state);
-            }
             return 0;
         default:
             return ARGP_ERR_UNKNOWN;
@@ -89,7 +84,7 @@ int main(int argc, char **argv) {
     // Abrir el archivo de entrada o usar stdin
     FILE *file =
         arguments.input_file ? fopen(arguments.input_file, "r") : stdin;
-    if (!file) {
+    if (arguments.input_file && !file) {
         fprintf(stderr, "Error al abrir el archivo\n");
         exit(EXIT_FAILURE);
     }

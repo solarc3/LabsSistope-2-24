@@ -155,6 +155,7 @@ int main(int argc, char **argv) {
     arguments.replacement_set = 0;
 
     // Parsear las opciones
+    // agregar ARGP_NO_ERRS si no quiero errores, como flag
     argp_parse(&argp, argc, argv, 0, 0, &arguments);
 
     // Abrir archivos de entrada y salida
@@ -162,7 +163,8 @@ int main(int argc, char **argv) {
         arguments.input_file ? fopen(arguments.input_file, "r") : stdin;
     FILE *out_file =
         arguments.output_file ? fopen(arguments.output_file, "w") : stdout;
-    if (!file || !out_file) {
+    if ((arguments.input_file && !file) ||
+        (arguments.output_file && !out_file)) {
         fprintf(stderr, "Error al abrir los archivos\n");
         exit(EXIT_FAILURE);
     }
