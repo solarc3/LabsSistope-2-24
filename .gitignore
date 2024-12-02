@@ -1,0 +1,8 @@
+*.log
+.env
+obj/
+water_jugs
+vccore.*
+*.gcov
+.DS_Store
+*.o
