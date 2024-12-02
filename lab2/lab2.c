@@ -2,214 +2,279 @@
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <unistd.h>
+size_t str_len(char *str) {
+    size_t size = 0;
+    while (str[size]) {
+        size++;
+    }
+    return size;
+}
 
-struct command {
-    char **argv;
-    int argc;
-    int input_from_file;
-    int output_to_file;
-    struct command *next;
-};
-int str_cmp(const char *s1, const char *s2) {
-    while (*s1 && *s2 && (*s1 == *s2)) {
+int str_compare(char *s1, char *s2) {
+    while (*s1 && *s2 && *s1 == *s2) {
         s1++;
         s2++;
     }
-    return (*s1 == *s2) ? 0 : (*s1 - *s2);
+    return *s1 == '\0' && *s2 == '\0';
 }
-char *str_dup(const char *s) {
-    const char *p = s;
-    int len = 0;
-    while (*p++)
-        len++;
-    char *dup = malloc(len + 1);
-    if (!dup)
-        return NULL;
-    for (int i = 0; i < len; i++) {
-        dup[i] = s[i];
+
+void str_cat(char *dest, const char *src) {
+    while (*dest)
+        dest++;
+    while ((*dest++ = *src++))
+        ;
+}
+
+typedef struct CommandNode {
+    char **args;
+    int argc;
+    struct CommandNode *next;
+} CommandNode;
+
+CommandNode *create_command_node() {
+    CommandNode *node = (CommandNode *)malloc(sizeof(CommandNode));
+    if (node == NULL) {
+        fprintf(stderr, "Error allocating command node");
+        exit(1);
     }
-    dup[len] = '\0';
-    return dup;
+    node->args = NULL;
+    node->argc = 0;
+    node->next = NULL;
+    return node;
 }
-struct command *parse_commands(int argc, char *argv[]) {
-    struct command *head = NULL;
-    struct command *current = NULL;
-    int i = 1;
 
-    while (i < argc) {
-        struct command *cmd = malloc(sizeof(struct command));
-        if (!cmd) {
-            perror("malloc");
+void free_command_list(CommandNode *head) {
+    CommandNode *current = head;
+    while (current != NULL) {
+        CommandNode *temp = current;
+        current = current->next;
+        free(temp->args);
+        free(temp);
+    }
+}
+
+char *concatenate_args(int argc, char *argv[]) {
+    // Calcular el tamaño total necesario
+    size_t total_len = 0;
+    for (int i = 1; i < argc; i++) {
+        total_len += str_len(argv[i]) + 1; // +1 para el espacio
+    }
+    char *result = (char *)malloc(total_len + 1); // +1 para el null terminator
+    if (result == NULL) {
+        perror("Error allocating memory");
+        exit(1);
+    }
+
+    // concat los argumentos
+    result[0] = '\0';
+    for (int i = 1; i < argc; i++) {
+        str_cat(result, argv[i]);
+        if (i < argc - 1) {
+            str_cat(result, " ");
+        }
+    }
+
+    return result;
+}
+
+char *str_tok(char *str, char delim, char **saveptr) {
+    if (str == NULL) {
+        str = *saveptr;
+    }
+    if (str == NULL || *str == '\0') {
+        return NULL;
+    }
+    while (*str == ' ') {
+        str++;
+    }
+    char *start = str;
+    while (*str != '\0' && *str != delim) {
+        str++;
+    }
+    if (*str == delim) {
+        *str = '\0';
+        *saveptr = str + 1;
+    } else {
+        *saveptr = NULL;
+    }
+    char *end = str - 1;
+    while (end > start && *end == ' ') {
+        *end = '\0';
+        end--;
+    }
+    return start;
+}
+
+void split_command(char *cmd, CommandNode *node) {
+    node->argc = 0;
+    int capacity = 10;
+    node->args = malloc(capacity * sizeof(char *));
+    char *word = cmd;
+    int in_word = 0;
+    while (*cmd != '\0') {
+        if (*cmd == ' ' || *cmd == '\t') {
+            if (in_word) {
+                *cmd = '\0';
+                if (node->argc >= capacity) {
+                    capacity *= 2;
+                    node->args = realloc(node->args, capacity * sizeof(char *));
+                }
+                node->args[node->argc++] = word;
+                in_word = 0;
+            }
+        } else if (!in_word) {
+            word = cmd;
+            in_word = 1;
+        }
+        cmd++;
+    }
+
+    if (in_word) {
+        if (node->argc >= capacity) {
+            capacity *= 2;
+            node->args = realloc(node->args, capacity * sizeof(char *));
+        }
+        node->args[node->argc++] = word;
+    }
+
+    node->args = realloc(node->args, (node->argc + 1) * sizeof(char *));
+    node->args[node->argc] = NULL;
+}
+
+CommandNode *parse_command(char *input) {
+    char *saveptr;
+    char *token;
+    CommandNode *head = NULL;
+    CommandNode *current = NULL;
+
+    token = str_tok(input, '|', &saveptr);
+    while (token != NULL) {
+        CommandNode *new_node = create_command_node();
+        split_command(token, new_node);
+        if (head == NULL) {
+            head = new_node;
+            current = new_node;
+        } else {
+            current->next = new_node;
+            current = new_node;
+        }
+        token = str_tok(NULL, '|', &saveptr);
+    }
+
+    return head;
+}
+
+void print_commands(CommandNode *head) {
+    CommandNode *current = head;
+    int cmd_num = 1;
+    while (current != NULL) {
+        printf("Comando %d:\n", cmd_num++);
+        for (int i = 0; i < current->argc; i++) {
+            printf("  arg[%d]: '%s'\n", i, current->args[i]);
+        }
+        printf("\n");
+        current = current->next;
+    }
+}
+
+void execute_commands(CommandNode *head) {
+    CommandNode *current = head;
+    int prev_pipe[2]; // pipe para ir viendo la comunicacion con la salida del
+                      // anterior
+    int first_command = 1;
+    pid_t last_pid = -1;
+
+    while (current != NULL) {
+        int pipe_fd[2];
+
+        // crear otro pipe si no es el ultimo comando
+        if (current->next != NULL) {
+            if (pipe(pipe_fd) == -1) {
+                fprintf(stderr, "Error creating pipe");
+                exit(EXIT_FAILURE);
+            }
+        }
+
+        pid_t pid = fork();
+        if (pid == -1) {
+            fprintf(stderr, "Error en fork");
             exit(EXIT_FAILURE);
         }
-        cmd->argv = NULL;
-        cmd->argc = 0;
-        cmd->input_from_file = 0;
-        cmd->output_to_file = 0;
-        cmd->next = NULL;
 
-        int capacity = 4;
-        cmd->argv = malloc(capacity * sizeof(char *));
-        if (!cmd->argv) {
-            perror("malloc");
-            exit(EXIT_FAILURE);
-        }
-
-        while (i < argc && !(argv[i][0] == '|' && argv[i][1] == '\0')) {
-            if (cmd->argc >= capacity - 1) {
-                capacity *= 2;
-                cmd->argv = realloc(cmd->argv, capacity * sizeof(char *));
-                if (!cmd->argv) {
-                    perror("realloc");
+        if (pid == 0) { // Proceso hijo
+            // Si no es el primer comando, configura la entrada desde el pipe
+            // anterior
+            if (!first_command) {
+                if (dup2(prev_pipe[0], STDIN_FILENO) == -1) {
+                    fprintf(stderr, "Error en dup2 para stdin");
                     exit(EXIT_FAILURE);
                 }
-            }
-            cmd->argv[cmd->argc] = argv[i];
-            cmd->argc++;
-
-            if ((argv[i][0] == '-') && (argv[i][1] == 'i') &&
-                (argv[i][2] == '\0')) {
-                cmd->input_from_file = 1;
-                i++; // Saltar al siguiente argumento
-                if (i < argc) {
-                    if (cmd->argc >= capacity - 1) {
-                        capacity *= 2;
-                        cmd->argv =
-                            realloc(cmd->argv, capacity * sizeof(char *));
-                        if (!cmd->argv) {
-                            perror("realloc");
-                            exit(EXIT_FAILURE);
-                        }
-                    }
-                    cmd->argv[cmd->argc] = argv[i];
-                    cmd->argc++;
-                }
-            } else if ((argv[i][0] == '-') && (argv[i][1] == 'o') &&
-                       (argv[i][2] == '\0')) {
-                cmd->output_to_file = 1;
-                i++; // Saltar al siguiente argumento
-                if (i < argc) {
-                    if (cmd->argc >= capacity - 1) {
-                        capacity *= 2;
-                        cmd->argv =
-                            realloc(cmd->argv, capacity * sizeof(char *));
-                        if (!cmd->argv) {
-                            perror("realloc");
-                            exit(EXIT_FAILURE);
-                        }
-                    }
-                    cmd->argv[cmd->argc] = argv[i];
-                    cmd->argc++;
-                }
+                close(prev_pipe[0]);
+                close(prev_pipe[1]);
             }
 
-            i++;
-        }
-        cmd->argv[cmd->argc] = NULL;
+            // si no es el ultimo comando, configura la salida hacia el
+            // siguiente pipe
+            if (current->next != NULL) {
+                if (dup2(pipe_fd[1], STDOUT_FILENO) == -1) {
+                    fprintf(stderr, "Error en dup2 para stdout");
+                    exit(EXIT_FAILURE);
+                }
+                close(pipe_fd[0]);
+                close(pipe_fd[1]);
+            }
 
-        if (head == NULL) {
-            head = cmd;
-        } else {
-            current->next = cmd;
+            // ejecutar el comando
+            execvp(current->args[0], current->args);
+            perror("Error en execvp");
+            exit(EXIT_FAILURE);
         }
-        current = cmd;
 
-        if (i < argc && argv[i][0] == '|' && argv[i][1] == '\0') {
-            i++; // Saltar el '|'
+        // si soy el padre, cerramos
+        if (!first_command) {
+            close(prev_pipe[0]);
+            close(prev_pipe[1]);
+        }
+
+        // si aun no se termina, se usan los pipes anteriores para ahora
+        if (current->next != NULL) {
+            prev_pipe[0] = pipe_fd[0];
+            prev_pipe[1] = pipe_fd[1];
+        }
+
+        // Esperar a que termine el comando anterior antes de continuar
+        if (last_pid != -1) {
+            int status;
+            waitpid(last_pid, &status, 0);
+        }
+
+        last_pid = pid;
+        first_command = 0;
+        current = current->next;
+    }
+
+    if (last_pid != -1) {
+        int status;
+        waitpid(last_pid, &status, 0);
+        if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {
+            fprintf(stderr, "Error: el último comando falló con código %d\n",
+                    WEXITSTATUS(status));
+            exit(WEXITSTATUS(status));
         }
     }
-    return head;
 }
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
-        write(2, "Uso: ./lab2 [comando1 [args]] [| comando2 [args]] ...\n", 55);
+        fprintf(stderr, "Error: No se ingresaron argumentos\n");
         exit(EXIT_FAILURE);
     }
 
-    struct command *cmd_list = parse_commands(argc, argv);
-    struct command *cmd = cmd_list;
-    int num_pipes = 0;
+    char *command_line = concatenate_args(argc, argv);
+    CommandNode *commands = parse_command(command_line);
+    execute_commands(commands);
+    free_command_list(commands);
+    free(command_line);
 
-    // Contar el número de comandos para crear los pipes necesarios
-    struct command *temp = cmd_list;
-    while (temp->next != NULL) {
-        num_pipes++;
-        temp = temp->next;
-    }
-
-    int pipes[num_pipes][2];
-    int i;
-    for (i = 0; i < num_pipes; i++) {
-        if (pipe(pipes[i]) == -1) {
-            perror("pipe");
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    int cmd_index = 0;
-    while (cmd != NULL) {
-        pid_t pid = fork();
-        if (pid == -1) {
-            perror("fork");
-            exit(EXIT_FAILURE);
-        }
-        if (pid == 0) {
-            // Proceso hijo
-
-            // Redirección de entrada si es necesario
-            if (cmd_index > 0) {
-                // No es el primer comando
-                if (dup2(pipes[cmd_index - 1][0], STDIN_FILENO) == -1) {
-                    perror("dup2 stdin");
-                    exit(EXIT_FAILURE);
-                }
-            }
-
-            // Redirección de salida si es necesario
-            if (cmd->next != NULL) {
-                // No es el último comando
-                if (dup2(pipes[cmd_index][1], STDOUT_FILENO) == -1) {
-                    perror("dup2 stdout");
-                    exit(EXIT_FAILURE);
-                }
-            }
-
-            // Cerrar todos los pipes en el hijo
-            for (int j = 0; j < num_pipes; j++) {
-                close(pipes[j][0]);
-                close(pipes[j][1]);
-            }
-
-            // Ejecutar el comando
-            execvp(cmd->argv[0], cmd->argv);
-            // Si execvp falla
-            perror("execvp");
-            exit(EXIT_FAILURE);
-        }
-        cmd = cmd->next;
-        cmd_index++;
-    }
-
-    // Cerrar todos los pipes en el padre
-    for (i = 0; i < num_pipes; i++) {
-        close(pipes[i][0]);
-        close(pipes[i][1]);
-    }
-
-    // Esperar a todos los hijos
-    for (i = 0; i < cmd_index; i++) {
-        wait(NULL);
-    }
-
-    // Liberar memoria
-    cmd = cmd_list;
-    while (cmd != NULL) {
-        struct command *next_cmd = cmd->next;
-        free(cmd->argv);
-        free(cmd);
-        cmd = next_cmd;
-    }
-
-    return 0;
+    return EXIT_SUCCESS;
 }
