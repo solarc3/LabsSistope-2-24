@@ -1,0 +1,22 @@
+root:x:0:0:root:holaroot:holabinholabash
+daemon:x:1:1:daemon:holausrholasbin:holausrholasbinholanologin
+bin:x:2:2:bin:holabin:holausrholasbinholanologin
+sys:x:3:3:sys:holadev:holausrholasbinholanologin
+sync:x:4:65534:sync:holabin:holabinholasync
+games:x:5:60:games:holausrholagames:holausrholasbinholanologin
+man:x:6:12:man:holavarholacacheholaman:holausrholasbinholanologin
+lp:x:7:7:lp:holavarholaspoolholalpd:holausrholasbinholanologin
+mail:x:8:8:mail:holavarholamail:holausrholasbinholanologin
+news:x:9:9:news:holavarholaspoolholanews:holausrholasbinholanologin
+uucp:x:10:10:uucp:holavarholaspoolholauucp:holausrholasbinholanologin
+proxy:x:13:13:proxy:holabin:holausrholasbinholanologin
+www-data:x:33:33:www-data:holavarholawww:holausrholasbinholanologin
+backup:x:34:34:backup:holavarholabackups:holausrholasbinholanologin
+list:x:38:38:Mailing List Manager:holavarholalist:holausrholasbinholanologin
+irc:x:39:39:ircd:holarunholaircd:holausrholasbinholanologin
+gnats:x:41:41:Gnats Bug-Reporting System (admin):holavarholalibholagnats:holausrholasbinholanologin
+nobody:x:65534:65534:nobody:holanonexistent:holausrholasbinholanologin
+systemd-network:x:100:102:systemd Network Management,,,:holarunholasystemd:holausrholasbinholanologin
+systemd-resolve:x:101:103:systemd Resolver,,,:holarunholasystemd:holausrholasbinholanologin
+messagebus:x:102:105::holanonexistent:holausrholasbinholanologin
+systemd-timesync:x:103:106:systemd Time Synchronization,,,:holarunholasystemd:holausrholasbinholanologin

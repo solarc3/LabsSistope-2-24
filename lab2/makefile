@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -g
-TARGETS = cut srep count
+TARGETS = cut srep count lab2
 
 all: $(TARGETS)
 
@@ -21,6 +21,12 @@ count: count.o
 
 count.o: count.c
 	$(CC) $(CFLAGS) -c count.c
+
+lab2: lab2.o
+	$(CC) $(CFLAGS) -o lab2 lab2.o
+
+lab2.o: lab2.c
+	$(CC) $(CFLAGS) -c lab2.c
 
 clean:
 	rm -f *.o $(TARGETS)
