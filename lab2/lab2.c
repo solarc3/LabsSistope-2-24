@@ -2,9 +2,10 @@
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <unistd.h>
+
 size_t str_len(char *str) {
     size_t size = 0;
-    while (str[size]) {
+    while (str[size] != '\0') {
         size++;
     }
     return size;
@@ -18,13 +19,12 @@ int str_compare(char *s1, char *s2) {
     return *s1 == '\0' && *s2 == '\0';
 }
 
-void str_cat(char *dest, const char *src) {
+void str_cat(char *dest, char *src) {
     while (*dest)
         dest++;
     while ((*dest++ = *src++))
         ;
 }
-
 typedef struct CommandNode {
     char **args;
     int argc;
@@ -179,8 +179,8 @@ void print_commands(CommandNode *head) {
 
 void execute_commands(CommandNode *head) {
     CommandNode *current = head;
-    int prev_pipe[2]; // pipe para ir viendo la comunicacion con la salida del
-                      // anterior
+    int prev_pipe[2]; // pipe para ir viendo la comunicacion con la salida
+                      // del anterior
     int first_command = 1;
     pid_t last_pid = -1;
 
@@ -202,8 +202,8 @@ void execute_commands(CommandNode *head) {
         }
 
         if (pid == 0) { // Proceso hijo
-            // Si no es el primer comando, configura la entrada desde el pipe
-            // anterior
+            // Si no es el primer comando, configura la entrada desde el
+            // pipe anterior
             if (!first_command) {
                 if (dup2(prev_pipe[0], STDIN_FILENO) == -1) {
                     fprintf(stderr, "Error en dup2 para stdin");
@@ -226,7 +226,7 @@ void execute_commands(CommandNode *head) {
 
             // ejecutar el comando
             execvp(current->args[0], current->args);
-            perror("Error en execvp");
+            fprintf(stderr, "Error en execvp");
             exit(EXIT_FAILURE);
         }
 
