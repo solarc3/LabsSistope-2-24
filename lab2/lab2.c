@@ -34,7 +34,7 @@ typedef struct CommandNode {
 CommandNode *create_command_node() {
     CommandNode *node = (CommandNode *)malloc(sizeof(CommandNode));
     if (node == NULL) {
-        fprintf(stderr, "Error allocating command node");
+        fprintf(stderr, "Error en malloc para el commandNode");
         exit(1);
     }
     node->args = NULL;
@@ -54,14 +54,14 @@ void free_command_list(CommandNode *head) {
 }
 
 char *concatenate_args(int argc, char *argv[]) {
-    // Calcular el tamaño total necesario
+    // Calcular el size necesario
     size_t total_len = 0;
     for (int i = 1; i < argc; i++) {
         total_len += str_len(argv[i]) + 1; // +1 para el espacio
     }
     char *result = (char *)malloc(total_len + 1); // +1 para el null terminator
     if (result == NULL) {
-        perror("Error allocating memory");
+        fprintf(stderr, "Error alocando memoria");
         exit(1);
     }
 
@@ -163,7 +163,7 @@ CommandNode *parse_command(char *input) {
 
     return head;
 }
-
+// debug
 void print_commands(CommandNode *head) {
     CommandNode *current = head;
     int cmd_num = 1;
@@ -190,7 +190,7 @@ void execute_commands(CommandNode *head) {
         // crear otro pipe si no es el ultimo comando
         if (current->next != NULL) {
             if (pipe(pipe_fd) == -1) {
-                fprintf(stderr, "Error creating pipe");
+                fprintf(stderr, "Error creando pipe");
                 exit(EXIT_FAILURE);
             }
         }
@@ -256,11 +256,6 @@ void execute_commands(CommandNode *head) {
     if (last_pid != -1) {
         int status;
         waitpid(last_pid, &status, 0);
-        if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {
-            fprintf(stderr, "Error: el último comando falló con código %d\n",
-                    WEXITSTATUS(status));
-            exit(WEXITSTATUS(status));
-        }
     }
 }
 
