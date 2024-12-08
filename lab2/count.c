@@ -38,7 +38,13 @@ int main(int argc, char **argv) {
     extern char *optarg;
     extern int optind;
     char *input_file = NULL;
+    int used_flags[128] = {0};
     while ((opt = getopt(argc, argv, "CLi:")) != -1) {
+        if (used_flags[opt]) {
+            fprintf(stderr, "Error: Opcion '-%c' ya fue especificada!\n", opt);
+            exit(EXIT_FAILURE);
+        }
+        used_flags[opt] = 1;
         switch (opt) {
             case 'C':
                 flag_C = 1;
@@ -89,7 +95,6 @@ int main(int argc, char **argv) {
 
     return EXIT_SUCCESS;
 }
-
 
 /*
 #include <argp.h>

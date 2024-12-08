@@ -31,7 +31,14 @@ int main(int argc, char *argv[]) {
     int *columns = NULL;
     int num_columns = 0;
     int all_columns = 1; // default, todas las columnas
+    int used_flags[128] = {0};
     while ((opt = getopt(argc, argv, "i:o:d:c:")) != -1) {
+        if (used_flags[opt]) {
+            fprintf(stderr, "Error: Opcion '-%c' ya fue especificada!\n", opt);
+            exit(EXIT_FAILURE);
+        }
+        used_flags[opt] = 1;
+
         switch (opt) {
             case 'i':
                 input_file = optarg;
@@ -58,8 +65,7 @@ int main(int argc, char *argv[]) {
                     fprintf(stderr, "Error: Columna no valida para -c\n");
                     exit(EXIT_FAILURE);
                 }
-                all_columns =
-                    0; // si se especifican columnas, no usar todas las columnas
+                all_columns = 0;
                 break;
             default:
                 fprintf(stderr,
@@ -245,8 +251,6 @@ void extract_columns(FILE *in, FILE *out, char sep, int *columns,
 
     free(line);
 }
-
-
 
 /*
 #include <argp.h>

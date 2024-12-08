@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 size_t str_len(char *str);
 char *str_str(char *haystack, char *needle);
 char *replace_str(char *line, char *target, char *replace);
@@ -124,8 +123,14 @@ int main(int argc, char **argv) {
     char *output_file = NULL;
     char *target = NULL;
     char *replacement = NULL;
-
+    int used_flags[128] = {0};
     while ((opt = getopt(argc, argv, "s:S:i:o:")) != -1) {
+        if (used_flags[opt]) {
+            fprintf(stderr, "Error: Opcion '-%c' ya fue especificada!\n", opt);
+            exit(EXIT_FAILURE);
+        }
+        used_flags[opt] = 1;
+
         switch (opt) {
             case 's':
                 target = optarg;
@@ -139,8 +144,15 @@ int main(int argc, char **argv) {
             case 'o':
                 output_file = optarg;
                 break;
+            default:
+                fprintf(stderr,
+                        "Uso: %s [-s string_objetivo] [-S string_nuevo] [-i "
+                        "archivo_entrada] [-o archivo_salida]\n",
+                        argv[0]);
+                exit(EXIT_FAILURE);
         }
     }
+
     if (target == NULL || replacement == NULL) {
         fprintf(stderr,
                 "Uso: %s [-s string_objetivo] [-S string_nuevo] [-i "
@@ -194,8 +206,6 @@ int main(int argc, char **argv) {
         fclose(out_file);
     return EXIT_SUCCESS;
 }
-
-
 
 /*
 #include <argp.h>
