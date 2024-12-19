@@ -86,6 +86,27 @@ void imprimirLista(const Lista *lista) {
     }
     printf("size: %d\n", lista->longitud);
 }
+void escribirEnArchivo(const Lista *lista, const char *nombreArchivo) {
+    FILE *fp = fopen(nombreArchivo, "w");
+    if (fp == NULL) {
+        perror("Error al abrir el archivo de salida");
+        return;
+    }
+
+    if (lista->cabeza == NULL) {
+        fprintf(fp, "La lista esta vacia.\n");
+        fclose(fp);
+        return;
+    }
+
+    Nodo *nodo = lista->cabeza;
+    for (int i = 0; i < lista->longitud; i++) {
+        fprintf(fp, "%d ", nodo->valor);
+        nodo = nodo->siguiente;
+    }
+    fprintf(fp, "\n");
+    fclose(fp);
+}
 void *threadFunc(void *args) {
     Nodo *nodo = (Nodo *)args;
     while (1) {
@@ -182,7 +203,9 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < lista->longitud; i++) {
         pthread_join(threads[i], NULL);
     }
-
+    if (output_file != NULL) {
+        escribirEnArchivo(lista, output_file);
+    }
     // Limpiar recursos
     pthread_mutex_destroy(&mutex);
     pthread_barrier_destroy(&barrier);
