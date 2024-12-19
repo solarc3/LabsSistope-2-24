@@ -1,6 +1,9 @@
 #include "funciones.h"
 #include <stdlib.h>
 
+// Entrada: puntero a lista
+// Salida: no hay salida en especifico, la lista es liberada
+// Descripcion: libera la memoria de la lista enlazada
 void limpiarLista(Lista *lista) {
     if (lista->cabeza != NULL) {
         Nodo *actual = lista->cabeza;
@@ -15,6 +18,11 @@ void limpiarLista(Lista *lista) {
         lista->longitud = 0;
     }
 }
+
+// Entrada: un archivo que contiene enteros separados por espacios y un puntero 
+//          que almacena la longitud o largo de la lista
+// Salida: puntero a lista inicializada con los datos/valores de dicho archivo
+// Descripcion: crea una lista enlazada a partir del archivo
 Lista *crearLista(FILE *archivo, int *longitud) {
     Lista *lista = (Lista *)malloc(sizeof(Lista));
     if (lista == NULL) {
@@ -55,6 +63,10 @@ Lista *crearLista(FILE *archivo, int *longitud) {
     *longitud = lista->longitud;
     return lista;
 }
+
+// Entrada: puntero a lista
+// Salida: valores impresos por terminal/consola
+// Descripcion: imprimir valores de la lista por consola
 void imprimirLista(const Lista *lista) {
     if (lista->cabeza == NULL) {
         printf("La lista esta vacia.\n");
@@ -68,6 +80,10 @@ void imprimirLista(const Lista *lista) {
         nodo = nodo->siguiente;
     }
 }
+
+// Entrada: puntero a lista y nombre del archivo de salida
+// Salida: los valores son escritos en el archivo
+// Descripcion: escribir los valores de la lista enlazada en el archivo
 void escribirEnArchivo(const Lista *lista, const char *nombreArchivo) {
     FILE *fp = fopen(nombreArchivo, "w");
     if (fp == NULL) {

@@ -4,12 +4,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// variables globales 
 pthread_mutex_t mutex;
 pthread_barrier_t barrier;
 int huboCambios = 0;
 int valoresSinCambio = 0;
 int totalNodos;
 
+// Entrada: puntero a nodo de la lista
+// Salida: no hay salida en especifico, a modo general, se retorna cuando no hay
+//         mas cambios en los valores de los nodos
+// Descripcion: actualiza los valores de los nodos en la lista
 void *threadFunc(void *args) {
     Nodo *nodo = (Nodo *)args;
     while (1) {
@@ -44,6 +49,7 @@ void *threadFunc(void *args) {
     }
 }
 
+// codigo principal  
 int main(int argc, char *argv[]) {
     int opt;
     char *input_file = NULL;
