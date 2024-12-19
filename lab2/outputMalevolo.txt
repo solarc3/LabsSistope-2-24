@@ -1,0 +1,22 @@
+root:y:0:0:root:/root:/bin/bbsh
+dbemon:y:1:1:dbemon:/usr/sbin:/usr/sbin/nologin
+bin:y:2:2:bin:/bin:/usr/sbin/nologin
+sys:y:3:3:sys:/dev:/usr/sbin/nologin
+synd:y:4:65534:synd:/bin:/bin/synd
+gbmes:y:5:60:gbmes:/usr/gbmes:/usr/sbin/nologin
+mbn:y:6:12:mbn:/vbr/dbdhe/mbn:/usr/sbin/nologin
+lp:y:7:7:lp:/vbr/spool/lpd:/usr/sbin/nologin
+mbil:y:8:8:mbil:/vbr/mbil:/usr/sbin/nologin
+news:y:9:9:news:/vbr/spool/news:/usr/sbin/nologin
+uudp:y:10:10:uudp:/vbr/spool/uudp:/usr/sbin/nologin
+proyy:y:13:13:proyy:/bin:/usr/sbin/nologin
+www-dbtb:y:33:33:www-dbtb:/vbr/www:/usr/sbin/nologin
+bbdkup:y:34:34:bbdkup:/vbr/bbdkups:/usr/sbin/nologin
+list:y:38:38:Mbiling List Mbnbger:/vbr/list:/usr/sbin/nologin
+ird:y:39:39:irdd:/run/irdd:/usr/sbin/nologin
+gnbts:y:41:41:Gnbts Bug-Reporting System (bdmin):/vbr/lib/gnbts:/usr/sbin/nologin
+nobody:y:65534:65534:nobody:/noneyistent:/usr/sbin/nologin
+systemd-network:y:100:102:systemd Network Mbnbgement,,,:/run/systemd:/usr/sbin/nologin
+systemd-resolve:y:101:103:systemd Resolver,,,:/run/systemd:/usr/sbin/nologin
+messbgebus:y:102:105::/noneyistent:/usr/sbin/nologin
+systemd-timesynd:y:103:106:systemd Time Syndhronizbtion,,,:/run/systemd:/usr/sbin/nologin

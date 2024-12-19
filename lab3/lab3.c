@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+
 pthread_mutex_t mutex;
 pthread_barrier_t barrier;
 int huboCambios = 0;
@@ -81,10 +82,10 @@ void imprimirLista(const Lista *lista) {
 
     Nodo *nodo = lista->cabeza;
     for (int i = 0; i < lista->longitud; i++) {
+
         printf("%d ", nodo->valor);
         nodo = nodo->siguiente;
     }
-    printf("size: %d\n", lista->longitud);
 }
 void escribirEnArchivo(const Lista *lista, const char *nombreArchivo) {
     FILE *fp = fopen(nombreArchivo, "w");
@@ -177,19 +178,7 @@ int main(int argc, char *argv[]) {
     int longitud;
     Lista *lista = crearLista(fp, &longitud);
     fclose(fp);
-    imprimirLista(lista);
-    printf("Valor previo al inicio (para confirmar circularidad): %d\n",
-           lista->cabeza->anterior->valor);
-    /*if (display_flag) {
 
-        if (lista->cabeza != NULL && lista->cabeza->anterior != NULL) {
-
-        }
-        }*/
-
-    // Aquí podrías agregar la lógica para manejar hilos (threads)
-    // ahora que se tienen los valores en la lista, se crea una hebra para cada
-    // valor y se le asigna un nodo de la lista
     pthread_mutex_init(&mutex, NULL);
     pthread_barrier_init(&barrier, NULL, lista->longitud);
     totalNodos = lista->longitud;
